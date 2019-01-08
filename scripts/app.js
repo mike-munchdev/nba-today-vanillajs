@@ -152,16 +152,14 @@ function getTeams() {
   } else {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', 'http://localhost:5000/api/v1/teams');
-    // console.log(xhr);
+    
     xhr.onload = function() {
       if (this.status == 200) {
-        // console.log(this.responseText);
+    
         let response = JSON.parse(this.responseText);
         const teams = response.filter(t => t.isNBAFranchise === true);
         sessionStorage.setItem('nba-teams', JSON.stringify(teams));
         displayScores({ teams });
-      } else {
-        console.log(this);
       }
     };
 
@@ -231,8 +229,7 @@ function displayScores({ teams, date }) {
     nbaTeams = JSON.parse(sessionStorage.getItem('nba-teams'));
   }
   let xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://localhost:5000/api/v1/games');
-  // console.log(xhr);
+  xhr.open('GET', 'http://localhost:5000/api/v1/games');  
   xhr.onload = function() {
     document.querySelector('#loading').className = 'hidden';
     if (this.status == 200) {
@@ -263,8 +260,7 @@ function displayScores({ teams, date }) {
           containerObj.append(createGamesListing('Finished', finishedGames));
         }
       }
-    } else {
-      console.log(this);
+    } else {      
       displayError('error found');
     }
   };
