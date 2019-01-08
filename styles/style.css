@@ -1,0 +1,42 @@
+body {
+    padding-bottom: 2.5em;
+}
+#loading {
+    margin-top: 2.5rem;
+}
+#alert {
+    margin-top: 2.5rem;
+}
+.hidden {
+    display:none;
+}
+.team-record {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.team-score {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+.game-time {    
+    font-size: 0.80rem;
+}
+.team-row {
+    margin-bottom: 0.5rem !important;
+}
+.team-name {    
+    font-size: 1rem;
+    font-weight: 700;
+}
+.game {
+    margin-bottom: 1em;
+}
+.list-title {
+    font-size: 1rem;
+}
+.game-listing {
+    margin-top: 2.5rem;
+}
+
+
