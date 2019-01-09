@@ -7,7 +7,7 @@ const httpErrorHandler = e => {
 function documentLoad() {
   const elLoading = document.createElement('div');
   elLoading.id = 'loading';
-  elLoading.className = 'col-md-5 mx-auto text-center';
+  elLoading.className = 'col-12 col-md-8 mx-auto text-center';
 
   const elLoadingSpinner = document.createElement('i');
   elLoadingSpinner.className = 'fa fa-spinner fa-3x fa-spin';
@@ -24,7 +24,7 @@ function displayError(text) {
     document.body.removeChild(prevAlert);
   }
   const elAlert = document.createElement('div');
-  elAlert.className = 'alert alert-danger col-md-5 mx-auto';
+  elAlert.className = 'alert alert-danger col-12 col-md-6 mx-auto';
   elAlert.id = 'alert';
   elAlert.role = 'alert';
 
@@ -88,6 +88,7 @@ function getGameStart(game) {
         headerDiv.innerHTML =
             '' + game.clock + ' ' + getNumberWithOrdinal(game.period.current);
       }
+      break;
     case 3:
       headerDiv.classList.add('text-muted');
       headerDiv.classList.add('font-weight-bold');
@@ -103,7 +104,7 @@ function getTeamLine(game, team) {
   rowEl.className = 'row team-row';
 
   const elTeamImgDiv = document.createElement('div');
-  elTeamImgDiv.className = 'col-md-2';
+  elTeamImgDiv.className = 'col-2';
 
   const elTeamImg = document.createElement('img');
   elTeamImg.src = 'assets/' + team.triCode + '.png';
@@ -116,7 +117,7 @@ function getTeamLine(game, team) {
   rowEl.appendChild(elTeamImgDiv);
 
   const elTeamName = document.createElement('div');
-  elTeamName.className = 'col-md-7';
+  elTeamName.className = 'col-7';
 
   const elTeamNameText = document.createElement('span');
   elTeamNameText.innerHTML = team.fullName;
@@ -126,7 +127,7 @@ function getTeamLine(game, team) {
   rowEl.appendChild(elTeamName);
 
   const elScore = document.createElement('div');
-  elScore.className = 'col-md-3 text-right';
+  elScore.className = 'col-3 text-right';
   elScore.appendChild(getScore(game, team));
 
   rowEl.appendChild(elScore);
@@ -152,10 +153,9 @@ function getTeams() {
   } else {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', 'http://localhost:5000/api/v1/teams');
-    
+
     xhr.onload = function() {
       if (this.status == 200) {
-    
         let response = JSON.parse(this.responseText);
         const teams = response.filter(t => t.isNBAFranchise === true);
         sessionStorage.setItem('nba-teams', JSON.stringify(teams));
@@ -173,7 +173,7 @@ function createGameHeader(headingText) {
   row.className = 'row';
 
   const headingRow = document.createElement('div');
-  headingRow.className = 'col-md-5 mx-auto';
+  headingRow.className = 'col-12 mx-auto';
 
   const heading = document.createElement('h2');
   heading.className = 'list-title';
@@ -189,7 +189,7 @@ function createScoreList(games) {
   row.className = 'row';
 
   const headingRow = document.createElement('div');
-  headingRow.className = 'col-md-5 mx-auto';
+  headingRow.className = 'col-12 mx-auto';
 
   const ulGames = document.createElement('ul');
   ulGames.className = 'list-group';
@@ -203,7 +203,8 @@ function createScoreList(games) {
   return row;
 }
 
-function createGamesListing(headerText, games) {
+function createGamesListing(headerText, games) {  
+
   const gamesListObj = document.createElement('div');
   gamesListObj.className = 'game-listing';
   const gamesHeaderObj = createGameHeader(headerText);
@@ -211,7 +212,7 @@ function createGamesListing(headerText, games) {
 
   const scoresListObj = createScoreList(games);
   gamesListObj.appendChild(scoresListObj);
-
+  
   return gamesListObj;
 }
 
@@ -229,7 +230,7 @@ function displayScores({ teams, date }) {
     nbaTeams = JSON.parse(sessionStorage.getItem('nba-teams'));
   }
   let xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://localhost:5000/api/v1/games');  
+  xhr.open('GET', 'http://localhost:5000/api/v1/games');
   xhr.onload = function() {
     document.querySelector('#loading').className = 'hidden';
     if (this.status == 200) {
@@ -245,22 +246,32 @@ function displayScores({ teams, date }) {
           return g;
         });
         const containerObj = document.querySelector('.container');
+        const row = document.createElement('div');
+        row.className = 'row';
 
+        const offsetCol = document.createElement('div');
+        offsetCol.className =
+          'col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3';
+
+        
+        
         const upcomingGames = games.filter(g => g.statusNum === 1);
         if (upcomingGames.length > 0) {
-          containerObj.append(createGamesListing('Upcoming', upcomingGames));
+          offsetCol.append(createGamesListing('Upcoming', upcomingGames));
         }
         const liveGames = games.filter(g => g.statusNum === 2);
         if (liveGames.length > 0) {
-          containerObj.append(createGamesListing('Live', liveGames));
+          offsetCol.append(createGamesListing('Live', liveGames));
         }
 
         const finishedGames = games.filter(g => g.statusNum === 3);
         if (finishedGames.length > 0) {
-          containerObj.append(createGamesListing('Finished', finishedGames));
+          offsetCol.append(createGamesListing('Finished', finishedGames));
         }
+        row.appendChild(offsetCol);
+        containerObj.appendChild(row);
       }
-    } else {      
+    } else {
       displayError('error found');
     }
   };
