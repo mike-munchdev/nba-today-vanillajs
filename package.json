@@ -1,0 +1,26 @@
+{
+  "name": "nba-today-vanillajs",
+  "version": "1.0.0",
+  "description": "NBA Today is a Vanilla JavaScipt application that communicates with https://github.com/mike-munchdev/nba-today-api.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mike-munchdev/nba-today-vanillajs.git"
+  },
+  "author": "Michael J. Griffin, Jr.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mike-munchdev/nba-today-vanillajs/issues"
+  },
+  "homepage": "https://github.com/mike-munchdev/nba-today-vanillajs#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "moment": "^2.23.0"
+  }
+}

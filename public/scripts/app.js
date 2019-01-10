@@ -14,8 +14,7 @@ function documentLoad() {
 
   elLoading.appendChild(elLoadingSpinner);
   document.body.appendChild(elLoading);
-
-  getTeams();
+  displayScores();
 }
 
 function displayError(text) {
@@ -146,27 +145,7 @@ function addGameListItem(game) {
   return li;
 }
 
-function getTeams() {
-  const nbaTeams = JSON.parse(sessionStorage.getItem('nba-teams'));
-  if (nbaTeams) {
-    displayScores({ teams: nbaTeams });
-  } else {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://localhost:5000/api/v1/teams');
 
-    xhr.onload = function() {
-      if (this.status == 200) {
-        let response = JSON.parse(this.responseText);
-        const teams = response.filter(t => t.isNBAFranchise === true);
-        sessionStorage.setItem('nba-teams', JSON.stringify(teams));
-        displayScores({ teams });
-      }
-    };
-
-    xhr.onerror = httpErrorHandler;
-    xhr.send();
-  }
-}
 
 function createGameHeader(headingText) {
   const row = document.createElement('div');
@@ -216,9 +195,9 @@ function createGamesListing(headerText, games) {
   return gamesListObj;
 }
 
-function displayScores({ teams, date }) {
+function displayScores(date) {
   let gameDate = date;
-  let nbaTeams = teams;
+  
   if (!gameDate) {
     // gameDate = moment().format("YYYYMMDD");
     gameDate = new Date()
@@ -226,25 +205,16 @@ function displayScores({ teams, date }) {
       .slice(0, 10)
       .replace(/-/g, '');
   }
-  if (!nbaTeams) {
-    nbaTeams = JSON.parse(sessionStorage.getItem('nba-teams'));
-  }
+ 
   let xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://localhost:5000/api/v1/games');
+  xhr.open('GET', '/api/v1/games');
   xhr.onload = function() {
     document.querySelector('#loading').className = 'hidden';
     if (this.status == 200) {
       let response = JSON.parse(this.responseText);
       if (response.length != 0) {
         // add full name to home and visting teams
-        const games = response.map(g => {
-          const hTeam = nbaTeams.find(t => g.hTeam.teamId == t.teamId);
-          const vTeam = nbaTeams.find(t => g.vTeam.teamId == t.teamId);
-
-          g.vTeam.fullName = vTeam.fullName;
-          g.hTeam.fullName = hTeam.fullName;
-          return g;
-        });
+        
         const containerObj = document.querySelector('.container');
         const row = document.createElement('div');
         row.className = 'row';
@@ -253,18 +223,17 @@ function displayScores({ teams, date }) {
         offsetCol.className =
           'col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3';
 
-        
-        
-        const upcomingGames = games.filter(g => g.statusNum === 1);
+      
+        const upcomingGames = response.filter(g => g.statusNum === 1);
         if (upcomingGames.length > 0) {
           offsetCol.append(createGamesListing('Upcoming', upcomingGames));
         }
-        const liveGames = games.filter(g => g.statusNum === 2);
+        const liveGames = response.filter(g => g.statusNum === 2);
         if (liveGames.length > 0) {
           offsetCol.append(createGamesListing('Live', liveGames));
         }
 
-        const finishedGames = games.filter(g => g.statusNum === 3);
+        const finishedGames = response.filter(g => g.statusNum === 3);
         if (finishedGames.length > 0) {
           offsetCol.append(createGamesListing('Finished', finishedGames));
         }
