@@ -51,8 +51,8 @@ router.get('/', async (req, res, next) => {
     const teams = await getTeams(year);
     let games = await getGames(moment());
     games = games.map(g => {
-      const hTeam = teams.find(t => g.hTeam.teamId == t.teamId);
-      const vTeam = teams.find(t => g.vTeam.teamId == t.teamId);
+      const hTeam = teams.find(t => g.hTeam.teamId === t.teamId);
+      const vTeam = teams.find(t => g.vTeam.teamId === t.teamId);
 
       g.vTeam.fullName = vTeam.fullName;
       g.hTeam.fullName = hTeam.fullName;
