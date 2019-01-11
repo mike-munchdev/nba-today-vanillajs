@@ -2,23 +2,24 @@ document.addEventListener('DOMContentLoaded', documentLoad);
 
 const httpErrorHandler = e => {
   stopLoadingAnimation();
-  const containerObj = document.querySelector('.container');  
+  const containerObj = document.querySelector('.container');
   const row = createMainRow();
   const offsetCol = createMainColumn();
   offsetCol.appendChild(createRefreshButton());
-  offsetCol.appendChild(getError('Error connecting to the server'));
+  offsetCol.appendChild(getAlert('Error connecting to the server', type));
   row.appendChild(offsetCol);
   containerObj.appendChild(row);
 };
 
 function documentLoad() {
   startLoadingAnimation();
-  displayScores(new Date());
+  displayScores();
 }
 
-function getError(text) {
+function getAlert(text, alertType) {
   const elAlert = document.createElement('div');
-  elAlert.className = 'alert alert-danger col-12 mx-auto';
+  elAlert.className =
+    'alert alert-' + (alertType || 'danger') + ' col-12 mx-auto';
   elAlert.id = 'alert';
   elAlert.role = 'alert';
 
@@ -91,7 +92,7 @@ function getGameStart(game) {
   return headerDiv;
 }
 
-function getTeamLine(game, team) {
+function getTeamLine(game, team) {  
   const rowEl = document.createElement('div');
   rowEl.className = 'row team-row';
 
@@ -111,15 +112,20 @@ function getTeamLine(game, team) {
   const elTeamName = document.createElement('div');
   elTeamName.className = 'col-7';
 
-  const elTeamNameText = document.createElement('span');
-  elTeamNameText.innerHTML = team.fullName;
-  elTeamNameText.className = 'team-name text-center h-100';
+  const elTeamNameText = document.createElement('div');
+  elTeamNameText.innerHTML = team.city;
+  elTeamNameText.className = 'team-name text-left h-50';
   elTeamName.appendChild(elTeamNameText);
+  
+  const elTeamNickNameText = document.createElement('div');
+  elTeamNickNameText.innerHTML = team.nickname;
+  elTeamNickNameText.className = 'team-nickname text-left h-50';
+  elTeamName.appendChild(elTeamNickNameText);
 
   rowEl.appendChild(elTeamName);
 
   const elScore = document.createElement('div');
-  elScore.className = 'col-3 text-right';
+  elScore.className = 'col-3 text-right align-middle';
   elScore.appendChild(getScore(game, team));
 
   rowEl.appendChild(elScore);
@@ -190,7 +196,6 @@ function stopLoadingAnimation() {
   if (elLoading) {
     elLoading.parentNode.removeChild(elLoading);
   }
-  
 }
 function startLoadingAnimation() {
   let elLoading = document.querySelector('#loading');
@@ -213,12 +218,30 @@ function startLoadingAnimation() {
   }
 }
 
+function createDatePicker(value) {
+  const div = document.createElement('div');
+  div.className = 'form-group';
+  const elDatePicker = document.createElement('input');
+  elDatePicker.type = 'date';
+  elDatePicker.id = 'scheduleDate';
+  elDatePicker.className = 'form-control';
+  elDatePicker.value = value || new Date().toISOString().slice(0, 10);
+  elDatePicker.required = true;
+
+  elDatePicker.addEventListener('change', function() {
+    if (this.valueAsDate) {
+      displayScores();
+    }
+  });
+  div.appendChild(elDatePicker);
+  return div;
+}
 function createRefreshButton() {
   const refreshButton = document.createElement('button');
   refreshButton.className = 'btn btn-outline-primary btn-block mt-2';
   refreshButton.innerHTML = 'Refresh';
   refreshButton.addEventListener('click', function() {
-    displayScores(new Date());
+    displayScores();
   });
 
   return refreshButton;
@@ -226,8 +249,8 @@ function createRefreshButton() {
 
 function createMainColumn() {
   const offsetCol = document.createElement('div');
-  offsetCol.className = 'col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3'; 
-  
+  offsetCol.className = 'col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3';
+
   return offsetCol;
 }
 function createMainRow() {
@@ -236,34 +259,42 @@ function createMainRow() {
   row.id = 'main';
   return row;
 }
-function displayScores(date) {
-  startLoadingAnimation();
+function displayScores() {
   // https://stackoverflow.com/a/3067896
-  let tDate = date || new Date();
+  const elDatePicker = document.querySelector('#scheduleDate');
+  let gameDate;
+  let pickerDate;
 
-  const month = tDate.getMonth() + 1;
-  const day = tDate.getDate();
+  if (elDatePicker) {
+    gameDate = elDatePicker.value.replace(/-/g, '');
+    pickerDate = elDatePicker.value;
+  } else {
+    const date = new Date();
 
-  const gameDate = [
-    tDate.getFullYear(),
-    (month > 9 ? '' : '0') + month,
-    (day > 9 ? '' : '0') + day
-  ].join('');
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    gameDate = [
+      date.getFullYear(),
+      (month > 9 ? '' : '0') + month,
+      (day > 9 ? '' : '0') + day
+    ].join('');
+  }
 
+  startLoadingAnimation();
   let xhr = new XMLHttpRequest();
   xhr.open('GET', '/api/v1/games/' + gameDate);
   xhr.onload = function() {
     stopLoadingAnimation();
     const containerObj = document.querySelector('.container');
- 
+
     const row = createMainRow();
     const offsetCol = createMainColumn();
     offsetCol.appendChild(createRefreshButton());
+    offsetCol.appendChild(createDatePicker(pickerDate));
 
     if (this.status == 200) {
-      let response = JSON.parse(this.responseText);
+      let response = JSON.parse(this.responseText);      
       if (response.length != 0) {
-        // add full name to home and visting teams
         const liveGames = response.filter(g => g.statusNum === 2);
         if (liveGames.length > 0) {
           offsetCol.append(createGamesListing('Live', liveGames));
@@ -278,9 +309,11 @@ function displayScores(date) {
         if (finishedGames.length > 0) {
           offsetCol.append(createGamesListing('Finished', finishedGames));
         }
+      } else {
+        offsetCol.appendChild(getAlert('No games scheduled', 'warning'));
       }
     } else {
-      offsetCol.appendChild(getError('error found'));
+      offsetCol.appendChild(getAlert('error found'));
     }
     row.appendChild(offsetCol);
     containerObj.appendChild(row);

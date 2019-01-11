@@ -29,6 +29,11 @@ body {
     font-size: 1rem;
     font-weight: 700;
 }
+
+.team-nickname {    
+    font-size: .80rem;
+    
+}
 .game {
     margin-bottom: 1em;
 }

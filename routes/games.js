@@ -57,8 +57,8 @@ router.get('/:date', async (req, res, next) => {
       const hTeam = teams.find(t => g.hTeam.teamId === t.teamId);
       const vTeam = teams.find(t => g.vTeam.teamId === t.teamId);
       
-      g.vTeam = {...g.vTeam, fullName: vTeam.fullName, city: vTeam.city, altCityName: vTeam.altCityName };
-      g.hTeam = {...g.hTeam, fullName: hTeam.fullName, city: hTeam.city, altCityName: hTeam.altCityName };
+      g.vTeam = {...g.vTeam, fullName: vTeam.fullName, city: vTeam.city, altCityName: vTeam.altCityName, nickname: vTeam.nickname };
+      g.hTeam = {...g.hTeam, fullName: hTeam.fullName, city: hTeam.city, altCityName: hTeam.altCityName, nickname: hTeam.nickname };
       
       return g;
     });
