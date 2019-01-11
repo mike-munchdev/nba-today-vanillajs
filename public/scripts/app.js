@@ -1,36 +1,27 @@
 document.addEventListener('DOMContentLoaded', documentLoad);
 
 const httpErrorHandler = e => {
-  displayError('Error connecting to the server');
+  const containerObj = document.querySelector('.container');  
+  const row = createMainRow();
+  const offsetCol = createMainColumn();
+  offsetCol.appendChild(getError('Error connecting to the server'));
+  row.appendChild(offsetCol);
+  containerObj.appendChild(row);
 };
 
 function documentLoad() {
-  const elLoading = document.createElement('div');
-  elLoading.id = 'loading';
-  elLoading.className = 'col-12 col-md-8 mx-auto text-center';
-
-  const elLoadingSpinner = document.createElement('i');
-  elLoadingSpinner.className = 'fa fa-spinner fa-3x fa-spin';
-
-  elLoading.appendChild(elLoadingSpinner);
-  document.body.appendChild(elLoading);
+  startLoadingAnimation();
   displayScores(new Date());
 }
 
-function displayError(text) {
-  const prevAlert = document.querySelector('#alert');
-  if (prevAlert) {
-    document.body.removeChild(prevAlert);
-  }
+function getError(text) {
   const elAlert = document.createElement('div');
-  elAlert.className = 'alert alert-danger col-12 col-md-6 mx-auto';
+  elAlert.className = 'alert alert-danger col-12 mx-auto';
   elAlert.id = 'alert';
   elAlert.role = 'alert';
 
-  document.querySelector('#loading').className = 'hidden';
-
   elAlert.innerHTML = text;
-  document.body.appendChild(elAlert);
+  return elAlert;
 }
 
 function getNumberWithOrdinal(n) {
@@ -192,13 +183,64 @@ function createGamesListing(headerText, games) {
   return gamesListObj;
 }
 
+function stopLoadingAnimation() {
+  let elLoading = document.querySelector('#loading');
+  elLoading.parentNode.removeChild(elLoading);
+}
+function startLoadingAnimation() {
+  let elLoading = document.querySelector('#loading');
+  let elMain = document.querySelector('#main');
+  if (elMain) {
+    elMain.parentNode.removeChild(elMain);
+  }
+
+  if (!elLoading) {
+    const container = document.querySelector('.container');
+    elLoading = document.createElement('div');
+    elLoading.id = 'loading';
+    elLoading.className = 'col-12 col-md-8 mx-auto text-center';
+
+    const elLoadingSpinner = document.createElement('i');
+    elLoadingSpinner.className = 'fa fa-spinner fa-3x fa-spin';
+    elLoading.appendChild(elLoadingSpinner);
+
+    container.appendChild(elLoading);
+  }
+}
+
+function createRefreshButton() {
+  const refreshButton = document.createElement('button');
+  refreshButton.className = 'btn btn-outline-primary btn-block mt-2';
+  refreshButton.innerHTML = 'Refresh';
+  refreshButton.addEventListener('click', function() {
+    displayScores(new Date());
+  });
+
+  return refreshButton;
+}
+
+function createMainColumn() {
+  const offsetCol = document.createElement('div');
+  offsetCol.className = 'col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3'; 
+  
+  return offsetCol;
+}
+function createMainRow() {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.id = 'main';
+  return row;
+}
 function displayScores(date) {
+  startLoadingAnimation();
   // https://stackoverflow.com/a/3067896
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
+  let tDate = date || new Date();
+
+  const month = tDate.getMonth() + 1;
+  const day = tDate.getDate();
 
   const gameDate = [
-    date.getFullYear(),
+    tDate.getFullYear(),
     (month > 9 ? '' : '0') + month,
     (day > 9 ? '' : '0') + day
   ].join('');
@@ -206,20 +248,17 @@ function displayScores(date) {
   let xhr = new XMLHttpRequest();
   xhr.open('GET', '/api/v1/games/' + gameDate);
   xhr.onload = function() {
-    document.querySelector('#loading').className = 'hidden';
+    stopLoadingAnimation();
+    const containerObj = document.querySelector('.container');
+ 
+    const row = createMainRow();
+    const offsetCol = createMainColumn();
+    offsetCol.appendChild(createRefreshButton());
+
     if (this.status == 200) {
       let response = JSON.parse(this.responseText);
       if (response.length != 0) {
         // add full name to home and visting teams
-
-        const containerObj = document.querySelector('.container');
-        const row = document.createElement('div');
-        row.className = 'row';
-
-        const offsetCol = document.createElement('div');
-        offsetCol.className =
-          'col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3';
-
         const liveGames = response.filter(g => g.statusNum === 2);
         if (liveGames.length > 0) {
           offsetCol.append(createGamesListing('Live', liveGames));
@@ -234,12 +273,12 @@ function displayScores(date) {
         if (finishedGames.length > 0) {
           offsetCol.append(createGamesListing('Finished', finishedGames));
         }
-        row.appendChild(offsetCol);
-        containerObj.appendChild(row);
       }
     } else {
-      displayError('error found');
+      offsetCol.appendChild(getError('error found'));
     }
+    row.appendChild(offsetCol);
+    containerObj.appendChild(row);
   };
 
   xhr.onerror = httpErrorHandler;
