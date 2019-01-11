@@ -62,7 +62,7 @@ router.get('/:date', async (req, res, next) => {
       
       return g;
     });
-    console.log(games);
+    
     res.send(games);
   } catch (e) {
     res.sendStatus(400);
