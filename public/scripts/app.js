@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', documentLoad);
 
 const httpErrorHandler = e => {
+  stopLoadingAnimation();
   const containerObj = document.querySelector('.container');  
   const row = createMainRow();
   const offsetCol = createMainColumn();
+  offsetCol.appendChild(createRefreshButton());
   offsetCol.appendChild(getError('Error connecting to the server'));
   row.appendChild(offsetCol);
   containerObj.appendChild(row);
@@ -185,7 +187,10 @@ function createGamesListing(headerText, games) {
 
 function stopLoadingAnimation() {
   let elLoading = document.querySelector('#loading');
-  elLoading.parentNode.removeChild(elLoading);
+  if (elLoading) {
+    elLoading.parentNode.removeChild(elLoading);
+  }
+  
 }
 function startLoadingAnimation() {
   let elLoading = document.querySelector('#loading');
