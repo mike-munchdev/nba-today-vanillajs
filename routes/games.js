@@ -33,8 +33,7 @@ const getSeasonScheduleYear = () => {
 // GET games listing.
 const getGames = date => {
   return new Promise(async (resolve, reject) => {
-    try {
-      console.log(date);
+    try {      
       const url = `http://data.nba.net/10s/prod/v2/${date}/scoreboard.json`;
       const response = await axios.get(url);
       resolve(response.data.games);
@@ -57,12 +56,13 @@ router.get('/:date', async (req, res, next) => {
     games = games.map(g => {
       const hTeam = teams.find(t => g.hTeam.teamId === t.teamId);
       const vTeam = teams.find(t => g.vTeam.teamId === t.teamId);
-
-      g.vTeam.fullName = vTeam.fullName;
-      g.hTeam.fullName = hTeam.fullName;
+      
+      g.vTeam = {...g.vTeam, fullName: vTeam.fullName, city: vTeam.city, altCityName: vTeam.altCityName };
+      g.hTeam = {...g.hTeam, fullName: hTeam.fullName, city: hTeam.city, altCityName: hTeam.altCityName };
+      
       return g;
     });
-
+    console.log(games);
     res.send(games);
   } catch (e) {
     res.sendStatus(400);
