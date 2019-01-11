@@ -14,7 +14,7 @@ function documentLoad() {
 
   elLoading.appendChild(elLoadingSpinner);
   document.body.appendChild(elLoading);
-  displayScores();
+  displayScores(new Date());
 }
 
 function displayError(text) {
@@ -193,18 +193,18 @@ function createGamesListing(headerText, games) {
 }
 
 function displayScores(date) {
-  let gameDate = date;
+  // https://stackoverflow.com/a/3067896
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
 
-  if (!gameDate) {
-    // gameDate = moment().format("YYYYMMDD");
-    gameDate = new Date()
-      .toISOString()
-      .slice(0, 10)
-      .replace(/-/g, '');
-  }
+  let gameDate = [
+    date.getFullYear(),
+    (month > 9 ? '' : '0') + month,
+    (day > 9 ? '' : '0') + day
+  ].join('');
 
   let xhr = new XMLHttpRequest();
-  xhr.open('GET', '/api/v1/games');
+  xhr.open('GET', '/api/v1/games/' + gameDate);
   xhr.onload = function() {
     document.querySelector('#loading').className = 'hidden';
     if (this.status == 200) {

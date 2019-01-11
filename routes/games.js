@@ -34,9 +34,8 @@ const getSeasonScheduleYear = () => {
 const getGames = date => {
   return new Promise(async (resolve, reject) => {
     try {
-      const url = `http://data.nba.net/10s/prod/v2/${date.format(
-        'YYYYMMDD'
-      )}/scoreboard.json`;
+      console.log(date);
+      const url = `http://data.nba.net/10s/prod/v2/${date}/scoreboard.json`;
       const response = await axios.get(url);
       resolve(response.data.games);
     } catch (e) {
@@ -45,11 +44,16 @@ const getGames = date => {
   });
 };
 
-router.get('/', async (req, res, next) => {
+router.get('/:date', async (req, res, next) => {
   try {
+    const { date } = req.params;
+
+    if (!date || !moment(date).isValid()) {      
+      throw new Error("Valid date required!");
+    }
     const year = await getSeasonScheduleYear();
     const teams = await getTeams(year);
-    let games = await getGames(moment());
+    let games = await getGames(date);
     games = games.map(g => {
       const hTeam = teams.find(t => g.hTeam.teamId === t.teamId);
       const vTeam = teams.find(t => g.vTeam.teamId === t.teamId);

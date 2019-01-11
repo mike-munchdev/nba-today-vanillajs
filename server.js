@@ -14,10 +14,11 @@ app.use('/api/v1/games', games);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// catch all
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname + '/public/index.html'));
+// handle 404s
+app.use(function(req, res, next) {
+  res.status(404).send('Route not available');
 });
+
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => console.log(`Server started on port ${port}`));
