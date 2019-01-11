@@ -145,8 +145,6 @@ function addGameListItem(game) {
   return li;
 }
 
-
-
 function createGameHeader(headingText) {
   const row = document.createElement('div');
   row.className = 'row';
@@ -182,8 +180,7 @@ function createScoreList(games) {
   return row;
 }
 
-function createGamesListing(headerText, games) {  
-
+function createGamesListing(headerText, games) {
   const gamesListObj = document.createElement('div');
   gamesListObj.className = 'game-listing';
   const gamesHeaderObj = createGameHeader(headerText);
@@ -191,13 +188,13 @@ function createGamesListing(headerText, games) {
 
   const scoresListObj = createScoreList(games);
   gamesListObj.appendChild(scoresListObj);
-  
+
   return gamesListObj;
 }
 
 function displayScores(date) {
   let gameDate = date;
-  
+
   if (!gameDate) {
     // gameDate = moment().format("YYYYMMDD");
     gameDate = new Date()
@@ -205,7 +202,7 @@ function displayScores(date) {
       .slice(0, 10)
       .replace(/-/g, '');
   }
- 
+
   let xhr = new XMLHttpRequest();
   xhr.open('GET', '/api/v1/games');
   xhr.onload = function() {
@@ -214,7 +211,7 @@ function displayScores(date) {
       let response = JSON.parse(this.responseText);
       if (response.length != 0) {
         // add full name to home and visting teams
-        
+
         const containerObj = document.querySelector('.container');
         const row = document.createElement('div');
         row.className = 'row';
@@ -223,14 +220,14 @@ function displayScores(date) {
         offsetCol.className =
           'col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3';
 
-      
-        const upcomingGames = response.filter(g => g.statusNum === 1);
-        if (upcomingGames.length > 0) {
-          offsetCol.append(createGamesListing('Upcoming', upcomingGames));
-        }
         const liveGames = response.filter(g => g.statusNum === 2);
         if (liveGames.length > 0) {
           offsetCol.append(createGamesListing('Live', liveGames));
+        }
+
+        const upcomingGames = response.filter(g => g.statusNum === 1);
+        if (upcomingGames.length > 0) {
+          offsetCol.append(createGamesListing('Upcoming', upcomingGames));
         }
 
         const finishedGames = response.filter(g => g.statusNum === 3);
