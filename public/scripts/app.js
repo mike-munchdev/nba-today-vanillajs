@@ -92,7 +92,7 @@ function getGameStart(game) {
   return headerDiv;
 }
 
-function getTeamLine(game, team) {  
+function getTeamLine(game, team) {
   const rowEl = document.createElement('div');
   rowEl.className = 'row team-row';
 
@@ -116,7 +116,7 @@ function getTeamLine(game, team) {
   elTeamNameText.innerHTML = team.city;
   elTeamNameText.className = 'team-name text-left h-50';
   elTeamName.appendChild(elTeamNameText);
-  
+
   const elTeamNickNameText = document.createElement('div');
   elTeamNickNameText.innerHTML = team.nickname;
   elTeamNickNameText.className = 'team-nickname text-left h-50';
@@ -225,7 +225,8 @@ function createDatePicker(value) {
   elDatePicker.type = 'date';
   elDatePicker.id = 'scheduleDate';
   elDatePicker.className = 'form-control';
-  elDatePicker.value = value || new Date().toISOString().slice(0, 10);
+  
+  elDatePicker.value = value || formatPickerDate(new Date());
   elDatePicker.required = true;
 
   elDatePicker.addEventListener('change', function() {
@@ -259,6 +260,22 @@ function createMainRow() {
   row.id = 'main';
   return row;
 }
+function joinDate(date, separator) {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return [
+    date.getFullYear(),
+    (month > 9 ? '' : '0') + month,
+    (day > 9 ? '' : '0') + day
+  ].join(separator);
+}
+function formatNBAScheduleDate(date) {
+  return joinDate(date, '');
+}
+
+function formatPickerDate(date) {
+  return joinDate(date, '-');
+}
 function displayScores() {
   // https://stackoverflow.com/a/3067896
   const elDatePicker = document.querySelector('#scheduleDate');
@@ -269,15 +286,7 @@ function displayScores() {
     gameDate = elDatePicker.value.replace(/-/g, '');
     pickerDate = elDatePicker.value;
   } else {
-    const date = new Date();
-
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    gameDate = [
-      date.getFullYear(),
-      (month > 9 ? '' : '0') + month,
-      (day > 9 ? '' : '0') + day
-    ].join('');
+    gameDate = formatNBAScheduleDate(new Date());
   }
 
   startLoadingAnimation();
@@ -293,7 +302,7 @@ function displayScores() {
     offsetCol.appendChild(createDatePicker(pickerDate));
 
     if (this.status == 200) {
-      let response = JSON.parse(this.responseText);      
+      let response = JSON.parse(this.responseText);
       if (response.length != 0) {
         const liveGames = response.filter(g => g.statusNum === 2);
         if (liveGames.length > 0) {
